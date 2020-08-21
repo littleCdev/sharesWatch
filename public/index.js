@@ -90,6 +90,7 @@ let app = new Vue({
                         alert(data.message)
                     }else{
                         alert("added");
+                        app.currentUrl="";
                         app.getShares();
                     }
                 })
