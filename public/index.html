@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>lcSharesWatch</title>
+    <script src="static/axios.min.js"></script>
+    <script type="text/javascript" src="static/vue.js"></script>
+    <link type="text/css" rel="stylesheet" href="static/materialize.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="static/style.css" media="screen,projection"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+<script type="text/x-template" id="modal-template">
+    <transition name="modal">
+        <div class="modal-mask" @click="$emit('close')">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+
+                    <div class="modal-header">
+                        <slot name="header">
+                            default header
+                        </slot>
+                    </div>
+
+                    <div class="modal-body">
+                        <slot name="body">
+                        </slot>
+                    </div>
+
+                    <div class="modal-footer">
+                        <slot name="footer">
+                            default footer
+                            <button class="modal-default-button" @click="$emit('close')">
+                                OK
+                            </button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</script>
+
+<nav class="orange darken-3">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+            <img src="static/logo.png" class="logo">
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="index.html">Shares</a></li>
+            <li><a href="telegram.html">Telegram</a></li>
+            <li><a href="log.html">Log</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="row">
+    <div class="col s8 offset-m2" id="stats">
+        <div v-if="loading">
+            loading
+        </div>
+
+        <div v-else>
+            <modal v-if="showModal">
+                <div slot="header">{{ modalData.name }}</div>
+                <div slot="body" class="row">
+                    <div class="col s12">
+                        Current price: {{ modalData.lastprice }}
+                    </div>
+                    <div class="col s12">
+                        <label>Alarmtype</label>
+                        <select  class="browser-default" v-model="selected">
+                            <!-- inline object literal -->
+                            <option v-bind:value="{ value:'gt' }" selected>greater than</option>
+                            <option v-bind:value="{ value:'lt' }" >less than</option>
+                        </select>
+                    </div>
+                    <div class="col s12">
+                        <label>Limit {{limit}}</label>
+                        <input v-model="limit" type="number">
+                    </div>
+
+                </div>
+                <div slot="footer">
+                    <div class="row">
+                        <button v-on:click="deleteShare()" class="btn-flat red">Delete</button>
+                        <button v-on:click="showModal=false;" class="btn-flat grey">Close</button>
+                        <button v-on:click="saveShare()" class="btn-flat green">Save</button>
+                    </div>
+                </div>
+            </modal>
+
+
+            <div class="row">
+                <div class="col s10 input-field">
+                    <input type="text" placeholder="comdirect url" v-model="currentUrl">
+                </div>
+                <div class="col s2">
+                    <button class="btn-large orange" @click="createNew()">
+                        add
+                    </button>
+                </div>
+            </div>
+
+            <table class="striped highlight">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Last price</th>
+                    <th>alarm</th>
+                    <th>Alarmlimit</th>
+                </tr>
+                </thead>
+                <tr v-for="share in shares" @click="openModal(share)">
+                    <td>{{ share.ID }}</td>
+                    <td>{{ share.name }}</td>
+                    <td>{{ share.lastprice }}</td>
+                    <td>{{ share.alarm }}</td>
+                    <td>{{ share.alarmlimit }}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="static/index.js"></script>
+<script type="text/javascript" src="static/materialize.js"></script>
+
+</body>
+</html>

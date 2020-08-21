@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>lcSharesWatch - log</title>
+    <script src="static/axios.min.js"></script>
+    <script type="text/javascript" src="static/vue.js"></script>
+    <link type="text/css" rel="stylesheet" href="static/materialize.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="static/style.css" media="screen,projection"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+<nav class="orange darken-3">
+    <div class="nav-wrapper">
+
+        <a href="#" class="brand-logo">
+            <img src="static/logo.png" class="logo">
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="index.html">Shares</a></li>
+            <li><a href="telegram.html">Telegram</a></li>
+            <li><a href="log.html">Log</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="row">
+    <div class="col s8 offset-m2" id="stats">
+        <div v-if="loading">
+            loading
+        </div>
+
+        <div v-else>
+
+            <h5>Log</h5>
+
+            <table class="striped highlight">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Function</th>
+                    <th>Message</th>
+                </tr>
+                </thead>
+                <tr v-for="entry in entries">
+                    <td>{{ entry.time }}</td>
+                    <td>{{ entry.function }}</td>
+                    <td>{{ entry.message }}</td>
+
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="static/materialize.js"></script>
+<script type="text/javascript" src="static/log.js"></script>
+
+</body>
+</html>
