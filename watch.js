@@ -122,13 +122,13 @@ async function checkShares(){
                 case "gt":
                     if(currentPrice > limit){
                         await db.run("UPDATE shares SET cooldown=? where ID=?",[(new Date()/1000),share.ID]);
-                        broadcastTgMessage(`${name} hit the limit of ${currentPrice}(current) > ${limit}(your limit)`);
+                        broadcastTgMessage(`${name} hit the limit!\n ${currentPrice} (current) > ${limit} (your limit)`);
                     }
                     break;
                 case "lt":
                     if(currentPrice < limit){
                         await db.run("UPDATE shares SET cooldown=? where ID=?",[(new Date()/1000),share.ID]);
-                        broadcastTgMessage(`${name} hit the limit of ${currentPrice}(current) < ${limit}(your limit)`);
+                        broadcastTgMessage(`${name} hit the limit!\n${currentPrice} (current) < ${limit} (your limit)`);
                     }
                     break;
             }
