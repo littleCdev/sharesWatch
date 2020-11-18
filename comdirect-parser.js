@@ -27,7 +27,12 @@ let getName = async function (text) {
     regex = /headline--inline\">((.|\s|\S)*?)<span/gmi;
     match = regex.exec(text);
     if(match == null || match[1] ===undefined) {
-        throw new Error("ERROR can not get Name");
+		// second try
+		regex = /headline headline--h1 headline--full-width headline--inline text-size--medium\">((.|\s|\S)*?)<span/gmi;
+		match = regex.exec(text);
+		 
+		if(match == null || match[1] ===undefined)
+			throw new Error("ERROR can not get Name");
 
     }
     let name = match[1];
