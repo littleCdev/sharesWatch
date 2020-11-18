@@ -67,7 +67,7 @@ async function main(){
         Log("main","Open telegram and messsage @botfather and add your bottoken to config.json");
         Log("main","then restart the application");
     }
-
+	clearLog();
     setInterval(checkShares,60000*5); // check shares every 5 minutes
     setInterval(clearLog,60000*60); // clear logs every hour
 }
