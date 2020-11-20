@@ -83,10 +83,12 @@ function Log(func,msg,noDb=false){
     }
 }
 
-function clearLog(){
+async function clearLog(){
     Log("clearLog","clearing log");
     let utime = new Date()/1000;
-    db.run("DELETE FROM log where utime<?",[utime-60*60*24*7]) // 60*60*24*7 => one week of logs
+    await db.run("DELETE FROM log where utime<?",[utime-60*60*24*7]) // 60*60*24*7 => one week of logs
+    await db.run("vacuum");
+    Log("clearLog","clearing log done");
 }
 
 async function checkShares(){
