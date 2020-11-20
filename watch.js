@@ -86,7 +86,7 @@ function Log(func,msg,noDb=false){
 async function clearLog(){
     Log("clearLog","clearing log");
     let utime = new Date()/1000;
-    await db.run("DELETE FROM log where utime<?",[utime-60*60*24*7]) // 60*60*24*7 => one week of logs
+    await db.run("DELETE FROM log where utime NOT IN (SELECT utime FROM log LIMIT 2000)") // keep 2000 entries
     await db.run("vacuum");
     Log("clearLog","clearing log done");
 }
