@@ -135,8 +135,7 @@ async function checkShares(){
             }
 
         }catch (e) {
-            broadcastTgMessage("error:" +e+"");
-            Log("checkShares",`error: ${e}`);
+            Log("checkShares",`error: ${share.ID} - ${share.name} : ${e}`);
         }
     }
 }
