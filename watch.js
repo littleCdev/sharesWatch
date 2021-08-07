@@ -115,6 +115,12 @@ async function checkShares(){
             let currentPrice = await comdirect.getPrice(text);
             currentPrice = parseFloat(currentPrice.replace(",","."));
             Log("checkShares",`currentPrice: ${currentPrice}`);
+            let lastPrice = parseFloat(share.lastprice);
+
+            if(lastPrice == currentPrice){
+                Log("checkShares",`price didn't change, skipping ${sahre.name}`);
+                continue;
+            }
 
             await db.run("UPDATE shares SET lastprice=? where ID=?",[currentPrice,share.ID]);
             let limit = parseFloat((share.alarmlimit+"").replace(",","."));
