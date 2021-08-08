@@ -167,7 +167,7 @@ async function checkShares(){
 
 
 async  function broadcastTgMessage(msg){
-    let users = await db.all("SELECT * FROM tgusers");
+    let users = await db.all("SELECT * FROM tgusers where accepted=1");
     Log("broadcastTgMessage",`broadcasting: ${msg}`);
     for(let i=0;i<users.length;i++){
         Log("broadcastTgMessage",`user: ${users[i].tgId} - ${users[i].username}`);
