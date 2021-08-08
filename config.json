@@ -1,4 +1,5 @@
 {
   "WebPort":  4000,
-  "BotToken":""
+  "BotToken":"",
+  "telegramAuth":false
 }

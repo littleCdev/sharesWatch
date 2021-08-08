@@ -2,6 +2,10 @@ const Config = require('./config.json');
 const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require("cookie-parser");
+const session = require('express-session')
+const {v4:uuidv4} = require('uuid');
+
 const app = express();
 const port = 4000;
 
@@ -15,6 +19,12 @@ const comdirect = require('./comdirect-parser');
 let db = null;
 let bot = null;
 
+let approvedSessions = {};
+// session cookies are not compatible with telegrambot button content
+let tgButtonToSession = {};
+
+app.use(session({ secret: 'secrect?', cookie: { maxAge: 60000 }}))
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/static',express.static('public'));
@@ -55,12 +65,21 @@ async function main(){
         Log("main",`Example app listening at http://localhost:${Config.WebPort}`);
     });
 
+    if(Config.BotToken.length == 0 && Config.telegramAuth){
+        Log("main","you enabled telegramauth but did not spcify an bot-token, this is impossible");
+        Log("main","please add an bottoken to yout config.json");
+    }
+
 
     if(Config.BotToken.length > 0){
         bot = new TelegramBot(Config.BotToken, {polling: true});
         Log("main","bot: polling");
         bot.on("message", async msg => {
             handleTelegramMessage(msg, msg.text);
+        });
+
+        bot.on('callback_query', function onCallbackQuery(callbackQuery) {
+            handleTelegramButton(callbackQuery);
         });
     }else {
         Log("main","Looks like you didn't add an Bottoken for telegram");
@@ -118,7 +137,7 @@ async function checkShares(){
             let lastPrice = parseFloat(share.lastprice);
 
             if(lastPrice == currentPrice){
-                Log("checkShares",`price didn't change, skipping ${sahre.name}`);
+                Log("checkShares",`price didn't change, skipping ${share.name}`);
                 continue;
             }
 
@@ -172,6 +191,30 @@ async function checkTgUser(msg){
     return user.accepted;
 }
 
+async function handleTelegramButton(callbackQuery){
+    const action = callbackQuery.data;
+    const msg = callbackQuery.message;
+    const opts = {
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+    };
+
+
+    let text = "Login ";
+
+    if(action.startsWith("approve:")){
+        let btnKey = action.replace("approve:","");
+        approvedSessions[tgButtonToSession[btnKey]] = true;
+        tgButtonToSession[btnKey] = null;
+
+        text+= "approved"
+    }else{
+        text+= "declined";
+    }
+
+    bot.editMessageText(text, opts);
+}
+
 async function setTgUser(id,enable){
     enable = enable+"";
     if(enable!=="0" && enable!=="1")
@@ -209,6 +252,67 @@ async function updateShare(id,alarm,alarmlimit){
     await db.run("UPDATE shares SET alarm=?,alarmlimit=?,cooldown=0 where ID=?",alarm,alarmlimit,id);
 }
 
+
+app.use((req,res,next)=>{
+    if(!Config.telegramAuth){
+        next();
+        return;
+    }
+
+    if(req.session.accepted == true){
+        next();
+        return;
+    }
+
+    req.session.valid = false;
+
+    if(req.cookies["connect.sid"] != undefined){
+        if(approvedSessions[req.cookies["connect.sid"]] == undefined){
+            Log("loginmiddleware","approvedSessions is still undefined, setting false");
+            approvedSessions[req.cookies["connect.sid"]] = false;
+            telegramLoginRequest(req,req.cookies["connect.sid"]);
+        }else if(approvedSessions[req.cookies["connect.sid"]] == true){
+            Log("loginmiddleware","approvedSessions was true, session accectped");
+            req.session.accepted = true;
+            next();
+            return;
+        }
+    }
+
+    if(req.path.startsWith("/static")){
+            next();
+            return;
+    }
+
+    res.status(403);
+    res.sendFile(`public/login.html`, {root: __dirname});
+})
+
+
+async function telegramLoginRequest(req,sessionstring){
+
+    let btnKey = uuidv4();
+
+    tgButtonToSession[btnKey] = sessionstring;
+
+    var options = {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [
+            [{ text: 'Approve', callback_data: "approve:"+btnKey }],
+            [{ text: 'Decline', callback_data: "decline:"+btnKey }],
+          ]
+        })
+      };
+
+    let msg = `new login request from\n${req.ip} - ${req.headers["user-agent"]}`;
+    let users = await db.all("SELECT * FROM tgusers where accepted=1");
+    Log("broadcastTgMessage",`broadcasting: ${msg}`);
+    for(let i=0;i<users.length;i++){
+        Log("broadcastTgMessage",`user: ${users[i].tgId} - ${users[i].username}`);
+        bot.sendMessage(users[i].tgId,msg,options);
+    }
+
+}
 
 app.get('/telegram/info', async function (req, res) {
     if(Config.BotToken.length == 0){
