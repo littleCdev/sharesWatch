@@ -23,7 +23,7 @@ let approvedSessions = {};
 // session cookies are not compatible with telegrambot button content
 let tgButtonToSession = {};
 
-app.use(session({ secret: 'secrect?', cookie: { maxAge: 60000 }}))
+app.use(session({ secret: 'secrect?', cookie: { maxAge: 3600000 * 12 }})) // 3600000 * 12 => 12hours
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
