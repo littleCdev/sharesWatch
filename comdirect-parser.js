@@ -5,14 +5,15 @@ let getPrice = async function (text) {
     let regex = /<span class="realtime-indicator--value text-size--xxlarge text-weight--medium">([\s ]+)?([0-9\.]+,[0-9]+)([\s ]+)?<\/span>/gmi;
     let match = regex.exec(text);
     if(match == null || match[2] ===undefined){
-        regex = /<span class="text-size--xxlarge text-weight--medium">([\s ]+)?([0-9\.]+,[0-9]+)([\s ]+)?<\/span>/gmi;
+        // regex = /<span class="text-size--xxlarge text-weight--medium">([\s ]+)?([0-9\.]+,[0-9]+)([\s ]+)?<\/span>/gmi;
+        regex = /<meta itemprop="price" content="(?<price>\d+[\.,]\d+)" \/>/gmi;
 
         match = regex.exec(text);
-        if(match == null || match[2] ===undefined) {
+        if(match == null || match[1] ===undefined) {
             throw new Error("ERROR can not get current price");
         }
     }
-    let currentPrice = match[2];
+    let currentPrice = match[1].replace(",",".");
 
     return currentPrice;
 };
