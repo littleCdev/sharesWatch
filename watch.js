@@ -176,7 +176,7 @@ async  function broadcastTgMessage(msg){
 }
 async function handleTelegramMessage(msg, text) {
     let check = await checkTgUser(msg);
-    Log("handleTelegramMessage",`new message from ${msg.chat.id} ${msg.chat.first_name}: ${msg.chat.text}`);
+    Log("handleTelegramMessage",`new message from ${msg.chat.id} ${msg.chat.first_name}: ${text}`);
     if(!check){
         bot.sendMessage(msg.chat.id,"Please wait for an administrator to approve your account");
         return;
